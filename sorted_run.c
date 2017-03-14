@@ -18,10 +18,14 @@ int phase1(char* input_file, int mem_size, int block_size, char* output_prefix){
     // the number of records in one buffer read
     int num_of_blocks =  mem_size / block_size / 2;
 	if (num_of_blocks < 1){
-		printf("Memory size is too small.\n");
+		printf("Memory size is too small for splitting.\n");
 		exit(1);
 	}
     num_records_chunk = num_of_blocks * block_size / sizeof(Record);
+	if ((num_records_chunk+1)*block_size < mem_size){
+		printf("Memory size is too small for merging.\n");
+		exit(1);
+	}
     
 
     // allocate a buffer in main

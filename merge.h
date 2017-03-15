@@ -98,6 +98,9 @@ void clean_up (MergeManager * merger);
 int compare_heap_elements_uid1 (HeapElement *a, HeapElement *b);
 int compare_heap_elements_uid2 (HeapElement *a, HeapElement *b);
 
+// query computation
+void merge_sort(char* file_uid1, char* file_uid2);
+int compare_two_uids(Record *buffer);
 
 
 #endif

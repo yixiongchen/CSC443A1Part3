@@ -1,11 +1,11 @@
 #include "merge.h"
 
 //manager fields should be already initialized in the caller
-int merge_runs (MergeManager * merger, int num_trunks, char *input_prefix, int buffer_capacity){	
+int merge_runs_uid2 (MergeManager * merger, int num_trunks, char *input_prefix, int buffer_capacity){	
 	int  result; //stores SUCCESS/FAILURE returned at the end	
 	
 	//1. go in the loop through all input files and fill-in initial buffers
-	if (init_merge (merger, num_trunks, input_prefix, buffer_capacity)!=SUCCESS){
+	if (init_merge_uid2 (merger, num_trunks, input_prefix, buffer_capacity)!=SUCCESS){
 		printf("INIT_MERGE FAILED\n");
 		return FAILURE;
 	}
@@ -13,7 +13,7 @@ int merge_runs (MergeManager * merger, int num_trunks, char *input_prefix, int b
 		HeapElement smallest;
 		Record next; //here next comes from input buffer
 		
-		if(get_top_heap_element (merger, &smallest)!=SUCCESS)
+		if(get_top_heap_element_uid2 (merger, &smallest)!=SUCCESS)
 			return FAILURE;
 
 		result = get_next_input_element (merger, smallest.run_id, &next);
@@ -22,7 +22,58 @@ int merge_runs (MergeManager * merger, int num_trunks, char *input_prefix, int b
 			return FAILURE;
 
 		if(result==SUCCESS) {//next element exists, may also return EMPTY
-			if(insert_into_heap (merger, smallest.run_id, &next)!=SUCCESS)
+			if(insert_into_heap_uid2 (merger, smallest.run_id, &next)!=SUCCESS)
+				return FAILURE;
+		}
+
+
+		merger->output_buffer [merger->current_output_buffer_position].UID1=smallest.UID1;
+		merger->output_buffer [merger->current_output_buffer_position].UID2=smallest.UID2;
+		
+		merger->current_output_buffer_position++;
+
+        //staying on the last slot of the output buffer - next will cause overflow
+		if(merger->current_output_buffer_position == merger-> output_buffer_capacity ) {
+			if(flush_output_buffer(merger)!=SUCCESS) {
+				return FAILURE;			
+				merger->current_output_buffer_position=0;
+			}	
+		}
+	}
+	//flush what remains in output buffer
+	if(merger->current_output_buffer_position > 0) {
+		if(flush_output_buffer(merger)!=SUCCESS)
+			return FAILURE;
+	}
+	
+	clean_up(merger);
+	return SUCCESS;	
+}
+
+
+
+int merge_runs_uid1 (MergeManager * merger, int num_trunks, char *input_prefix, int buffer_capacity){	
+	int  result; //stores SUCCESS/FAILURE returned at the end	
+	
+	//1. go in the loop through all input files and fill-in initial buffers
+	if (init_merge_uid1 (merger, num_trunks, input_prefix, buffer_capacity)!=SUCCESS){
+		printf("INIT_MERGE FAILED\n");
+		return FAILURE;
+	}
+	while (merger->current_heap_size > 0) { //heap is not empty
+		HeapElement smallest;
+		Record next; //here next comes from input buffer
+		
+		if(get_top_heap_element_uid1 (merger, &smallest)!=SUCCESS)
+			return FAILURE;
+
+		result = get_next_input_element (merger, smallest.run_id, &next);
+		
+		if (result==FAILURE)
+			return FAILURE;
+
+		if(result==SUCCESS) {//next element exists, may also return EMPTY
+			if(insert_into_heap_uid1 (merger, smallest.run_id, &next)!=SUCCESS)
 				return FAILURE;
 		}
 
@@ -51,6 +102,7 @@ int merge_runs (MergeManager * merger, int num_trunks, char *input_prefix, int b
 	clean_up(merger);
 	return SUCCESS;	
 }
+
 
 
 void print_heap(MergeManager * manager){
@@ -84,7 +136,7 @@ void print_buffers(MergeManager * manager){
 }
 
 
-int get_top_heap_element (MergeManager * merger, HeapElement * result){
+int get_top_heap_element_uid2 (MergeManager * merger, HeapElement * result){
 	HeapElement item;
 	int child, parent;
 
@@ -102,11 +154,11 @@ int get_top_heap_element (MergeManager * merger, HeapElement * result){
 	while ((child = (2 * parent) + 1) < merger->current_heap_size) {
 		// if there are two children, compare them 
 		if (child + 1 < merger->current_heap_size && 
-				(compare_heap_elements(&(merger->heap[child]),&(merger->heap[child + 1]))>0)) 
+				(compare_heap_elements_uid2(&(merger->heap[child]),&(merger->heap[child + 1]))>0)) 
 			++child;
 		
 		// compare item with the larger 
-		if (compare_heap_elements(&item, &(merger->heap[child]))>0) {
+		if (compare_heap_elements_uid2(&item, &(merger->heap[child]))>0) {
 			merger->heap[parent] = merger->heap[child];
 			parent = child;
 		} 
@@ -118,7 +170,49 @@ int get_top_heap_element (MergeManager * merger, HeapElement * result){
 	return SUCCESS;
 }
 
-int insert_into_heap (MergeManager * merger, int run_id, Record *input){
+
+
+
+int get_top_heap_element_uid1 (MergeManager * merger, HeapElement * result){
+	HeapElement item;
+	int child, parent;
+
+	if(merger->current_heap_size == 0){
+		printf( "UNEXPECTED ERROR: popping top element from an empty heap\n");
+		return FAILURE;
+	}
+
+	*result=merger->heap[0];  //to be returned
+
+	//now we need to reorganize heap - keep the smallest on top
+	item = merger->heap [--merger->current_heap_size]; // to be reinserted 
+
+	parent =0;
+	while ((child = (2 * parent) + 1) < merger->current_heap_size) {
+		// if there are two children, compare them 
+		if (child + 1 < merger->current_heap_size && 
+				(compare_heap_elements_uid1(&(merger->heap[child]),&(merger->heap[child + 1]))>0)) 
+			++child;
+		
+		// compare item with the larger 
+		if (compare_heap_elements_uid1(&item, &(merger->heap[child]))>0) {
+			merger->heap[parent] = merger->heap[child];
+			parent = child;
+		} 
+		else 
+			break;
+	}
+	merger->heap[parent] = item;
+	
+	return SUCCESS;
+}
+
+
+
+
+
+
+int insert_into_heap_uid2 (MergeManager * merger, int run_id, Record *input){
 
 	HeapElement new_heap_element;
 	int child, parent;
@@ -136,7 +230,7 @@ int insert_into_heap (MergeManager * merger, int run_id, Record *input){
 	
 	while (child > 0) {
 		parent = (child - 1) / 2;
-		if (compare_heap_elements(&(merger->heap[parent]),&new_heap_element)>0) {
+		if (compare_heap_elements_uid2(&(merger->heap[parent]),&new_heap_element)>0) {
 			merger->heap[child] = merger->heap[parent];
 			child = parent;
 		} 
@@ -150,11 +244,46 @@ int insert_into_heap (MergeManager * merger, int run_id, Record *input){
 }
 
 
+int insert_into_heap_uid1 (MergeManager * merger, int run_id, Record *input){
+
+	HeapElement new_heap_element;
+	int child, parent;
+	
+	new_heap_element.UID1 = input->UID1;
+	new_heap_element.UID2 = input->UID2;
+	new_heap_element.run_id = run_id;
+	
+	if (merger->current_heap_size == merger->heap_capacity) {
+		printf( "Unexpected ERROR: heap is full\n");
+		return FAILURE;
+	}
+  	
+	child = merger->current_heap_size++; /* the next available slot in the heap */
+	
+	while (child > 0) {
+		parent = (child - 1) / 2;
+		if (compare_heap_elements_uid1(&(merger->heap[parent]),&new_heap_element)>0) {
+			merger->heap[child] = merger->heap[parent];
+			child = parent;
+		} 
+		else 
+			break;
+	}
+	
+	merger->heap[child]= new_heap_element;
+
+	return SUCCESS;
+}
+
+
+
+
+
 /*
 ** TO IMPLEMENT
 */
 
-int init_merge (MergeManager * manager, int num_trunks, char *input_prefix, int buffer_capacity) {
+int init_merge_uid2 (MergeManager * manager, int num_trunks, char *input_prefix, int buffer_capacity) {
 	
 	strcpy(manager->input_prefix, "sorted_list");
 	manager->input_buffer_capacity = buffer_capacity;
@@ -211,15 +340,86 @@ int init_merge (MergeManager * manager, int num_trunks, char *input_prefix, int 
 			return FAILURE;
 		}
 		if(result==SUCCESS) {//next element exists, may also return EMPTY
-			if(insert_into_heap (manager, i, &next)!=SUCCESS)
+			if(insert_into_heap_uid2 (manager, i, &next)!=SUCCESS)
 				return FAILURE;
 		}
 	}
 	
-	strcpy(manager->output_file_name, "records_sorted.dat");
+	strcpy(manager->output_file_name, "records_sorted_uid2.dat");
 	
 	return SUCCESS;
 }
+
+
+
+int init_merge_uid1 (MergeManager * manager, int num_trunks, char *input_prefix, int buffer_capacity) {
+	
+	strcpy(manager->input_prefix, "sorted_list");
+	manager->input_buffer_capacity = buffer_capacity;
+	manager->output_buffer_capacity = buffer_capacity;
+	manager->heap_capacity = num_trunks;
+	manager->current_heap_size = 0;
+	
+	manager->heap = (HeapElement *) calloc (num_trunks, sizeof (HeapElement));
+	
+	manager->input_file_numbers = (int *) calloc (num_trunks, sizeof (int));
+	for (int i = 0; i < num_trunks; i++){
+		manager->input_file_numbers[i] = i;
+	}
+	
+	manager->output_buffer = (Record *) calloc (buffer_capacity, sizeof (Record));
+	
+	manager->current_output_buffer_position = 0;
+	
+	manager->input_buffers = (Record **) calloc (num_trunks, sizeof (Record *));
+	for (int i = 0; i < num_trunks; i++) { 
+		manager->input_buffers[i] = (Record *) calloc (buffer_capacity, sizeof (Record));
+	}
+	
+	manager->current_input_file_positions = (int *) calloc (num_trunks, sizeof (int));
+	for (int i = 0; i < num_trunks; i++){
+		manager->current_input_file_positions[i] = 0;
+	}
+	
+	manager->current_input_buffer_positions = (int *) calloc (num_trunks, sizeof (int));
+	for (int i = 0; i < num_trunks; i++){
+		manager->current_input_buffer_positions[i] = 0;
+	}
+	
+	manager->file_capacity = (int *) calloc (num_trunks, sizeof (int));
+	for (int i = 0; i < num_trunks; i++){
+		manager->file_capacity[i] = get_number_records_in_file(manager, i);
+	}
+	
+	manager->total_input_buffer_elements = calloc (num_trunks, sizeof (int));
+	for (int i = 0; i < num_trunks; i++){
+		manager->total_input_buffer_elements[i] = 0;
+	}
+	
+	// Fill buffer and insert_into_heap
+	for (int i = 0; i < num_trunks; i++){
+		refill_buffer(manager, i);
+		
+		Record next; //here next comes from input buffer
+
+		int result = get_next_input_element (manager, i, &next);
+		
+		if (result==FAILURE){
+			printf("GET_NEXT_INPUT_ELEMENT FAILURE: Fail to get record from run %d\n", i);
+			return FAILURE;
+		}
+		if(result==SUCCESS) {//next element exists, may also return EMPTY
+			if(insert_into_heap_uid1 (manager, i, &next)!=SUCCESS)
+				return FAILURE;
+		}
+	}
+	
+	strcpy(manager->output_file_name, "records_sorted_uid1.dat");
+	
+	return SUCCESS;
+}
+
+
 
 
 int get_number_records_in_file(MergeManager * manager, int file_number){
@@ -327,6 +527,7 @@ int refill_buffer (MergeManager * manager, int file_number) {
 	return SUCCESS;
 }
 
+
 void clean_up (MergeManager * merger) {
 	free(merger->heap);
 	free(merger->input_file_numbers);
@@ -339,7 +540,8 @@ void clean_up (MergeManager * merger) {
 	free(merger->file_capacity);
 }
 
-int compare_heap_elements (HeapElement *a, HeapElement *b) {
+
+int compare_heap_elements_uid2 (HeapElement *a, HeapElement *b) {
 	if (a->UID2 > b->UID2){
 		return 1;
 	}
@@ -348,6 +550,28 @@ int compare_heap_elements (HeapElement *a, HeapElement *b) {
 			return 1;
 		}
 		else if (a->UID1 == b->UID1){
+			return 0;
+		}
+		else{
+			return -1;
+		}
+	}
+	else{
+		return -1;
+	}
+}
+
+
+
+int compare_heap_elements_uid1 (HeapElement *a, HeapElement *b) {
+	if (a->UID1 > b->UID1){
+		return 1;
+	}
+	else if (a->UID1 == b->UID1){
+		if (a->UID2 > b->UID2){
+			return 1;
+		}
+		else if (a->UID2 == b->UID2){
 			return 0;
 		}
 		else{

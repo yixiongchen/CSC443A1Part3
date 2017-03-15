@@ -15,20 +15,22 @@ MERGE_EXTERNAL_SRC=merge_external.c
 MAIN_SRC=main.c
 READ_RAM_SEQ_SRC=read_ram_seq.c
 DISTRIBUTION_SRC=distribution.c
-SORT_UID2_SRC=sort_uid2.c
+SORT_UID_SRC=sort_uid.c
 GET_MAX_DEGREE_SRC = get_max_degree.c
+TRUE_FRIEND_SRC = true_friend.c
 # Binaries
-all: write_blocks_seq read_ram_seq disk_sort distribution
+all: write_blocks_seq read_ram_seq disk_sort distribution true_friend
  
 #sequential writing in blocks
 write_blocks_seq: $(WRITE_BLOCKS_SRC)
 	$(CC) $(CFLAGS) $^ -o $@ 
 read_ram_seq: $(READ_RAM_SEQ_SRC)
 	$(CC) $(CFLAGS) $^ -o $@ 
-disk_sort: $(DISK_SORT_SRC) $(SORTED_RUN_SRC) $(MERGE_EXTERNAL_SRC) $(SORT_UID2_SRC) $(MAIN_SRC)
+disk_sort: $(DISK_SORT_SRC) $(SORTED_RUN_SRC) $(MERGE_EXTERNAL_SRC) $(SORT_UID_SRC) $(MAIN_SRC)
 	$(CC) $(CFLAGS) $^ -o $@
-distribution: $(DISTRIBUTION_SRC) $(DISK_SORT_SRC) $(SORTED_RUN_SRC) $(MERGE_EXTERNAL_SRC) $(SORT_UID2_SRC) $(GET_MAX_DEGREE_SRC)
+distribution: $(DISTRIBUTION_SRC) $(DISK_SORT_SRC) $(SORTED_RUN_SRC) $(MERGE_EXTERNAL_SRC) $(SORT_UID_SRC) $(GET_MAX_DEGREE_SRC)
 	$(CC) $(CFLAGS) $^ -o $@ 
-
+true_friend: $(TRUE_FRIEND_SRC) $(DISK_SORT_SRC) $(SORTED_RUN_SRC) $(MERGE_EXTERNAL_SRC) $(SORT_UID_SRC)
+	$(CC) $(CFLAGS) $^ -o $@ 
 clean:  
-	rm write_blocks_seq disk_sort sorted_list*.dat records_sorted.dat read_ram_seq distribution edges_sorted_uid2.csv
+	rm write_blocks_seq disk_sort sorted_list*.dat records_sorted.dat read_ram_seq distribution true_friend edges_sorted_uid2.csv

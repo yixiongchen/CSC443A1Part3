@@ -12,21 +12,49 @@
 * negative: record a < record b
 * zero: equal records
 */
-int compareUID2 (const void *a, const void *b) {
-	Record one = *(Record*)a;
-	Record two = *(Record*)b;
-	int a_f = one.UID2;
-	int b_f = two.UID2;
-	return (a_f - b_f);
+int compareUID1 (const void *one, const void *two) {
+	Record a = *(Record*)one;
+	Record b = *(Record*)two;
+	if (a.UID1 > b.UID1){
+		return 1;
+	}
+	else if (a.UID1 == b.UID1){
+		if (a.UID2 > b.UID2){
+			return 1;
+		}
+		else if (a.UID2 == b.UID2){
+			return 0;
+		}
+		else{
+			return -1;
+		}
+	}
+	else{
+		return -1;
+	}
 }
 
 
-int compareUID1 (const void *a, const void *b) {
-	Record one = *(Record*)a;
-	Record two = *(Record*)b;
-	int a_f = one.UID1;
-	int b_f = two.UID1;
-	return (a_f - b_f);
+int compareUID2 (const void *one, const void *two) {
+	Record a = *(Record*)one;
+	Record b = *(Record*)two;
+	if (a.UID2 > b.UID2){
+		return 1;
+	}
+	else if (a.UID2 == b.UID2){
+		if (a.UID1 > b.UID1){
+			return 1;
+		}
+		else if (a.UID1 == b.UID1){
+			return 0;
+		}
+		else{
+			return -1;
+		}
+	}
+	else{
+		return -1;
+	}
 }
 
 

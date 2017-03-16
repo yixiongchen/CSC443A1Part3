@@ -52,7 +52,8 @@ typedef struct merge_manager {
 int sort_uid(char *input_file, int mem_size, int block_size, int column);
 
 // DISK_SORT
-int compare (const void *a, const void *b);
+int compareUID1 (const void *one, const void *two);
+int compareUID2 (const void *one, const void *two);
 void sort(Record * buffer, int total_records, int column);
 void print_records(Record * buffer, int total_records);
 

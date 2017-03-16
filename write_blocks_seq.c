@@ -52,21 +52,21 @@ int main(int argc, char **argv) {
 	if (strlen(current_line) > 0){
 	    Record r = parseToRecord(current_line);
 	    if (records_in_buffer == records_per_block){
-		ftime(&t_begin);
-		fwrite ( buffer, sizeof(Record), records_in_buffer, fp_write);
-		ftime(&t_end);
-		records_in_buffer = 0;
-		time_spent_ms += (long) (1000 *(t_end.time - t_begin.time)
-		    + (t_end.millitm - t_begin.millitm)); 
-	    }
-	    ftime(&t_begin);
-	    buffer[records_in_buffer] = r;
-	    ftime(&t_end);
-	    time_spent_ms += (long) (1000 *(t_end.time - t_begin.time)
-		+ (t_end.millitm - t_begin.millitm)); 
-	    records_in_buffer++;
-	    total_records++;
-	}
+			ftime(&t_begin);
+			fwrite ( buffer, sizeof(Record), records_in_buffer, fp_write);
+			ftime(&t_end);
+			records_in_buffer = 0;
+			time_spent_ms += (long) (1000 *(t_end.time - t_begin.time)
+				+ (t_end.millitm - t_begin.millitm)); 
+			}
+			ftime(&t_begin);
+			buffer[records_in_buffer] = r;
+			ftime(&t_end);
+			time_spent_ms += (long) (1000 *(t_end.time - t_begin.time)
+			+ (t_end.millitm - t_begin.millitm)); 
+			records_in_buffer++;
+			total_records++;
+		}
     }
     
     if (records_in_buffer > 0){

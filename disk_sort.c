@@ -12,7 +12,7 @@
 * negative: record a < record b
 * zero: equal records
 */
-int compare_uid2 (const void *a, const void *b) {
+int compareUID2 (const void *a, const void *b) {
 	Record one = *(Record*)a;
 	Record two = *(Record*)b;
 	int a_f = one.UID2;
@@ -21,7 +21,7 @@ int compare_uid2 (const void *a, const void *b) {
 }
 
 
-int compare_uid1 (const void *a, const void *b) {
+int compareUID1 (const void *a, const void *b) {
 	Record one = *(Record*)a;
 	Record two = *(Record*)b;
 	int a_f = one.UID1;
@@ -30,7 +30,7 @@ int compare_uid1 (const void *a, const void *b) {
 }
 
 
-void uid1_sort(Record * buffer, int total_records){
+void sort(Record * buffer, int total_records, int column){
 	/**
 	* Arguments:
 	* 1 - an array to sort
@@ -39,22 +39,12 @@ void uid1_sort(Record * buffer, int total_records){
 	* 4 - function to compare two elements of the array
 	*/
 	
-	qsort(buffer, total_records, sizeof(Record), compare_uid1);
-}
-
-
-
-
-void uid2_sort(Record * buffer, int total_records){
-	/**
-	* Arguments:
-	* 1 - an array to sort
-	* 2 - size of an array
-	* 3 - size of each array element
-	* 4 - function to compare two elements of the array
-	*/
-	
-	qsort(buffer, total_records, sizeof(Record), compare_uid2);
+	if (column == 1){
+		qsort(buffer, total_records, sizeof(Record), compareUID1);
+	}
+	else{
+		qsort(buffer, total_records, sizeof(Record), compareUID2);
+	}
 }
 
 

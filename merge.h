@@ -41,6 +41,7 @@ typedef struct merge_manager {
 	int *current_input_buffer_positions; //position in current input buffer
 	int *total_input_buffer_elements;  //number of actual elements currently in input buffer - can be less than max capacity
 	int current_heap_size;
+	int column;
 	int heap_capacity;  //corresponds to the total number of runs (input buffers)
 	char output_file_name [MAX_PATH_LENGTH]; //stores name of the file to which to write the final output
 	char input_prefix [MAX_PATH_LENGTH]; //stores the prefix of a path to each run - to concatenate with run id and to read the file
@@ -48,18 +49,15 @@ typedef struct merge_manager {
 
 
 // MAIN
-int sort_uid2(char *input_file, int mem_size, int block_size);
-int sort_uid1(char *input_file, int mem_size, int block_size);
+int sort_uid(char *input_file, int mem_size, int block_size, int column);
 
 // DISK_SORT
-int compare_uid1 (const void *a, const void *b);
-int compare_uid2 (const void *a, const void *b);
-void uid1_sort(Record * buffer, int total_records);
-void uid2_sort(Record * buffer, int total_records);
+int compare (const void *a, const void *b);
+void sort(Record * buffer, int total_records, int column);
 void print_records(Record * buffer, int total_records);
 
 // SORTED_RUN
-int phase1(char* input_file, int mem_size, int block_size, char* output_filename, int uid);
+int phase1(char* input_file, int mem_size, int block_size, char* output_filename, int column);
 
 // HELPER
 int get_number_records_in_file(MergeManager * manager, int file_number);
@@ -69,21 +67,19 @@ void print_heap(MergeManager * manager);
 long get_max_degree(char* file_name, int block_size, int column_id);
 
 //1. main loop
-int merge_runs_uid1 (MergeManager * manager, int num_trunks, char *input_prefix, int buffer_capacity); 
-int merge_runs_uid2 (MergeManager * manager, int num_trunks, char *input_prefix, int buffer_capacity); 
+int merge_runs (MergeManager * manager, int num_trunks, char *input_prefix, int buffer_capacity, int column); 
 
 //2. creates and fills initial buffers, initializes heap taking 1 top element from each buffer 
-int init_merge_uid1 (MergeManager * manager, int num_trunks, char *input_prefix, int buffer_capacity); 
-int init_merge_uid2 (MergeManager * manager, int num_trunks, char *input_prefix, int buffer_capacity); 
+int init_merge (MergeManager * manager, int num_trunks, char *input_prefix, int buffer_capacity, int column); 
+
 //3. flushes output buffer to disk when full
 int flush_output_buffer (MergeManager * manager); 
 
 //4. returns top heap element, rearranges heap nodes
-int get_top_heap_element_uid1 (MergeManager * manager, HeapElement * result);
-int get_top_heap_element_uid2 (MergeManager * manager, HeapElement * result);
+int get_top_heap_element (MergeManager * manager, HeapElement * result);
+
 //5. inserts new element into heap, rearranges nodes to keep smallest on top
-int insert_into_heap_uid1 (MergeManager * manager, int run_id, Record *input);
-int insert_into_heap_uid2 (MergeManager * manager, int run_id, Record *input);
+int insert_into_heap (MergeManager * manager, int run_id, Record *input);
 
 //6. reads next element from an input buffer to transfer it to the heap. Uploads records from disk if all elements are processed
 int get_next_input_element(MergeManager * manager, int file_number, Record *result); 
@@ -95,12 +91,8 @@ int refill_buffer (MergeManager * manager, int file_number);
 void clean_up (MergeManager * merger);
 
 //9. Application-specific comparison function
-int compare_heap_elements_uid1 (HeapElement *a, HeapElement *b);
-int compare_heap_elements_uid2 (HeapElement *a, HeapElement *b);
+int compare_heap_elements (HeapElement *a, HeapElement *b, int column);
 
-// query computation
-void merge_sort(char* file_uid1, char* file_uid2);
-int compare_two_uids(Record *buffer);
 
 
 #endif

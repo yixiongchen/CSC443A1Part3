@@ -4,10 +4,7 @@
 #include <sys/timeb.h>
 #include "merge.h"
 
-
-
-
-int phase1(char* input_file, int mem_size, int block_size, char* output_prefix, int uid){
+int phase1(char* input_file, int mem_size, int block_size, char* output_prefix, int column){
 
 	FILE *fp_read, *fp_write;
 	int total_records;
@@ -17,10 +14,6 @@ int phase1(char* input_file, int mem_size, int block_size, char* output_prefix, 
 
     // the number of records in one buffer read
     int num_of_blocks =  mem_size / block_size / 2;
-	if (num_of_blocks < 1){
-		printf("Memory size is too small.\n");
-		exit(1);
-	}
     num_records_chunk = num_of_blocks * block_size / sizeof(Record);
     
 
@@ -49,13 +42,7 @@ int phase1(char* input_file, int mem_size, int block_size, char* output_prefix, 
   
 		if (load_records > 0){
 			 //sort records in main memory
-			if(uid == 1){
-				uid1_sort(buffer, load_records);
-
-			}
-    	    if(uid == 2){
-    	    	uid2_sort(buffer, load_records);
-    	    }
+    	    sort(buffer, load_records, column);
     	    //write sorted list into disk
     	    
     	    char string[MAX_PATH_LENGTH];

@@ -11,7 +11,7 @@ int main(int argc, char **argv){
 	
 	if (column_id == 2){
 		int mem_size = 200 * 1024 * 1024;
-		if (sort_uid2(file_name, mem_size, block_size) > 0){
+		if (sort_uid(file_name, mem_size, block_size, 2) > 0){
 			printf("ERROR IN SORTING BY UID2\n");
 			exit(1);
 		}

@@ -29,8 +29,9 @@ read_ram_seq: $(READ_RAM_SEQ_SRC)
 disk_sort: $(DISK_SORT_SRC) $(SORTED_RUN_SRC) $(MERGE_EXTERNAL_SRC) $(SORT_UID_SRC) $(MAIN_SRC)
 	$(CC) $(CFLAGS) $^ -o $@
 distribution: $(DISTRIBUTION_SRC) $(DISK_SORT_SRC) $(SORTED_RUN_SRC) $(MERGE_EXTERNAL_SRC) $(SORT_UID_SRC) $(GET_MAX_DEGREE_SRC)
-	$(CC) $(CFLAGS) $^ -o $@ 
+	$(CC) $(CFLAGS) $^ -o $@
 true_friend: $(TRUE_FRIEND_SRC) $(DISK_SORT_SRC) $(SORTED_RUN_SRC) $(MERGE_EXTERNAL_SRC) $(SORT_UID_SRC)
 	$(CC) $(CFLAGS) $^ -o $@ 
+
 clean:  
-	rm write_blocks_seq disk_sort sorted_list*.dat records_sorted.dat read_ram_seq distribution true_friend edges_sorted_uid2.csv
+	rm write_blocks_seq disk_sort sorted_list*.dat records_sorted*.dat read_ram_seq distribution edges_sorted_uid2.csv true_friend

@@ -1,6 +1,9 @@
 First Query:
 Run Time: real 503.918 user 385.503498 sys 105.286052
 
+Result: 21776094
+
+
 
 Second Query:
 Run Time: real 0.003 user 0.000413 sys 0.000776

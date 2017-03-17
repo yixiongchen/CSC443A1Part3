@@ -19,6 +19,8 @@ void merge_sort(char* file_uid1, char* file_uid2, int mem_size, int block_size){
 	int position_1, position_2;
 	int capacity_output_buffer;
 	int count;
+    int distinct_user = 0;
+    int current_user;
    
     //each input buffer contain 49 blocks (98MB)
 	int num_of_blocks =  (mem_size / block_size / 2) - 1;
@@ -63,8 +65,14 @@ void merge_sort(char* file_uid1, char* file_uid2, int mem_size, int block_size){
     position_2 = 0; 
     count = 0;
 
+    current_user = buffer_uid1[position_1].UID1;
+
     //iteration
     while(1){
+        if(current_user != buffer_uid1[position_1].UID1){
+            distinct_user += 1;
+            current_user = buffer_uid1[position_1].UID1;
+        }
     	//refill input buffer for R 
     	if(position_1== result_1){
     		result_1 = fread(buffer_uid1, sizeof(Record), num_records_chunk, fp_read_uid1);
@@ -144,7 +152,7 @@ void merge_sort(char* file_uid1, char* file_uid2, int mem_size, int block_size){
     fclose(fp_read_uid1);
     fclose(fp_read_uid1);
     fclose(fp_write);  
-    printf("total number is:%d\n", count);	
+    printf("Total number of friends is:%d\n", count);	
 
 }
 

@@ -1,6 +1,6 @@
 SELECT COUNT(*) 
 FROM 
-(SElECT T.uid1, T.uid2
+(SELECT T.uid1, T.uid2
 FROM 
 	(SELECT * FROM R WHERE uid1 < uid2) as T, 
 	(SELECT * FROM R WHERE uid2 < uid1) as S 
